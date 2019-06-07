@@ -457,7 +457,8 @@ unrar x filename.rar
 
 
 echo命令:
-
+echo $PATH
+echo $HOME
 
 
 
