@@ -459,7 +459,9 @@ unrar x filename.rar
 echo命令:
 echo $PATH
 echo $HOME
-
+设置常用路径:
+vim .bashrc
+export paper_dir=/home/wtx/Desktop/论文$paper_dir
 
 
 
