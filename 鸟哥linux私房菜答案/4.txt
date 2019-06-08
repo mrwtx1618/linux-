@@ -1,0 +1,117 @@
+第四部分 Linux使用者管理
+
+第14章 Linux账号管理与ACL权限设置
+·root的UID与GID是多少？基于这个理由，我要让test这个账号具有root的权限，应该怎么做？
+答：root的UID与GID都是0，UID只有0和非0两种，0代表系统管理员。所以要让test这个账号具有root的权限，只要把test的UID和GID都改为0即可。
+
+·假设我是一个系统管理员，我有一个用户最近不乖顺，所以我想暂时将他的账号停掉，让他近期无法进行任何操作，等到将来他乖顺一点之后，我再将他的账号启用，请问我可以怎么做比较好？
+答：有几种办法。一是将/etc/passwd的shell字段写成/sbin/nologin，即可以让该账号暂时无法登录主机；二是将/etc/shadow内的口令字段添加一个*号在最前面；三是将/etc/shadow的第八个字段关于账号取消日期的改成小于当前日期的数字。
+
+·我在使用useradd的时候，新增的账号里面的UID、GID还有其他相关的密码控制，都是在哪几个文件里面设置的？
+答：在/etc/login.defs还有/etc/default/useradd里面。
+
+·我希望我在设置每个账号的时候（使用useradd），默认情况中，他们的主文件夹就含有一个名称为www的子目录，我应该怎么做比较好？
+答：使用useradd的时候系统会自动以/etc/skel为默认home目录，所以在这个目录里新建一个名称为www的子目录即可。
+
+·简单说明系统账号与一般用户账号的区别。
+答：从UID来说，UID为1~499的就是系统账号，往后为一般用户账号。系统账号拥有的权限一般比一般用户账号大，系统账号可以调用某些系统资源。
+
+·简单说明，为何CentOS5.x新建用户时，它会主动帮用户新建一个用户组，而不是使用/etc/default/useradd的设置？
+答：不同的Linux distributions对于user的group创建机制不同，主要有两种。一种是Public group schemes：用户将会直接得到一个系统指定的群组，一般来说是users；另一种是Private group schemes：系统会创建一个与账号相同的群组。CentOS5.x就属于后者。
+
+·新建一个用户名称alex，他所属用户组为alexgroup，预计使用csh，他的全名为“Alex Tsai”，且他还得要加入users用户组当中。
+答：groupadd alexgroup
+useradd -c "Alex Tsai" -g alexgroup -G users -m alex
+先创建群组再创建使用者。
+
+·由于种种因素，导致你的用户主文件夹以后都需要被放置到/account这个目录下。请问，我该如何做才可以当使用useradd时默认的主文件夹就指向/account？
+答：修改变量。编辑/etc/default/useradd，将HOME=/home改成HOME=/account即可。
+
+·我想要让dmtsai这个用户加入vbird1，vbird2，vbird3这三个用户组，且不影响dmtsai原本已经支持的次要用户组时，该如何操作？
+
+答：usermod -a -G vbird1,vbird2,vbird3 dmtsai
+
+
+第15章 磁盘配额（Quota）与高级文件系统管理
+·在前一章的第一个大量新增账号范例中，如果我想要让每个用户均具有soft、hard各为40MB、50MB的容量时，应该如何修改这个script？
+答：先将/home制作好quota的环境然后再do...done内的最后一行，新增一行内容为setquota -u $username 40000 50000 0 0 /home
+
+·如果我想要让RAID具有保护数据的功能，防止因为硬件损毁而导致数据的丢失，那我应该要选择的RAID等级可能有哪些（请以本章谈到的等级来思考即可）？
+答：RAID-1，RAID-5，RAID-6
+
+·在默认的LVM设置中，请问LVM能否具有“备份”的功能？
+答：snopshot快照功能可以进行数据备份
+
+·LVM内的LV据说仅能达到256GB的容量，请问如何克服此容量的问题？
+答：LV容量与PE有关，由于PE默认为4MB，所以才会有这样的限制。修改PE的值即可。
+
+·如果IDE计算机主机有提供RAID 0的功能，你将你的三块硬盘全部在BIOS阶段使用RAID芯片整合成为一块大硬盘，则此硬盘在Linux系统当中的文件名为何？
+答：/dev/sda
+
+第16章 例行性工作（crontab）
+·今天假设我有一个命令程序，名称为ping.sh。我想要让系统每三分钟执行这个文件一次，但是偏偏这个文件会有很多的信息显示出来，所以我的root账号每天都会受到差不多四百多封的信件，光是收信就差不多快要疯掉了。那么请问应该怎么设置比较好呢？
+答：按信件重要与否选择导入文件或丢弃。这样写：*/3**** root /usr/local/ping.sh > /dev/null 2>&1
+
+·你预计要在2010年的2月14日寄出一封Email给kiki，只有该年才寄出！该如何执行命令？
+答：at 1am 2010-02-14
+
+·执行crontab -e之后，如果输入这一行，代表什么意思？
+* 15 ** 1-5 /usr/local/bin/backup.sh
+这一行代表的意义是什么？
+答：在每星期的 1~5 ，下午 3 点的每分钟，共进行 60 次 /usr/local/bin/tea_time.sh 这个文件。 要特别注意的是，每个星期 1~5 的 3 点都会进行 60 次ㄟ！很麻烦，是错误的写法，应该是要写成：
+25 00 * * 0 root /usr/local/bin/backup.sh
+
+·请问，你的系统每天、每周、每个月各有进行什么工作？
+答：以CentOS系统为例，默认的例行性命令都放置在 /etc/cron.* 里面，所以，你可以自行去： /etc/cron.daily/, /etc/cron.week/, /etc/cron.monthly/
+
+·每个星期六凌晨三点去系统查找一下含有SUID/SGID的任何文件，并将结果输出到/rmp/uidgid.files中。
+答：vi /etc/crontab
+
+第17章 程序管理与SELinux初探
+·简单说明什么是程序（program）而什么是进程（process）。
+答：程序 (program) 是系统上面可以被运行的文件，由于Linux的完整文件路径 (由 / 写起) 仅能有一个， 所以 program 的档名具有单一性。当程序被运行后，就会启动成程序 (process)， 一个 program 可以被不同的使用者或者相同的使用者重复的运行成为多个程序， 且该程序所造成的程序还因为不同的使用者，而有不同的权限，且每个 process 几乎都是独立的。
+
+·我今天想要查询/etc/crontab与crontab这个进程的用法与写法，请问我该如何在线查询？
+答：查询/etc/crontab可以用man 5 crontab，查询crontab可以用man crontab或info crontab
+
+·我要如何查询crond这个daemon的PID与它的PRI值？
+答：ps aux | grep crond
+
+·我要如何修改crond这个PID的优先执行顺序？
+答：先以 ps aux 找到 crond 的 PID 后，再以renice -n number PID来调整。
+
+·我是一般身份用户，我是否可以调整不属于我的程序的nice值？此外，如果我调整了我自己的进程的nice值到10，是否可以将它调回5呢？
+答：不可以。因为一般身份使用者仅能调整属于自己的 PID 程序，并且，只能将 nice 值调高，不能调低，所以调整为10之后，就不能降回5
+
+·我要怎么知道我的网卡在开机的过程中有没有被捕获到？
+答：用dmesg来观察
+
+第18章 认识系统服务（daemons）
+·使用netstat -ful与netstat -tunl有什么差异？为何会这样？
+答：使用 n 时， netstat 就不会使用主机名与服务名称 (hostname & service_name) 来显示， 取而代之的则是以 IP 及 port number 来显示的。IP 的分析与 /etc/hosts 及 /etc/resolv.conf 有关， 这个在未来服务器篇才会提到。至于 port number 则与 /etc/services 有关。
+
+·你能否找出来启动port 3306这个端口的服务是什么？
+答：透过搜寻 /etc/services 内容，得到 port 3306 为 mysql 所启动的端口。利用搜索引擎搜索， 可得到 mysql 为一种网络数据库系统软件。
+
+·你可以通过哪些命令查询到目前系统默认开机会启动的服务？
+答：用chkconfig或ntsysv都可以。
+
+·承上，那么哪些服务目前是在启动的状态？
+答：可以透过 service --status-all，或者是透过 netstat -anl 等方式。也可以透过 pstree 去查询。 只是相关对应的服务daemon就得要个别查询了。
+
+·利用tcp wrappers与xinetd，可以使用哪两个文件进行网络防火墙的管理？
+答：/etc/hosts.{allow,deny}
+
+第19章 认识与分析日志文件
+·syslogd可以作为日志文件服务器，请以man page的方式配合network关键字，查出syslogd需要加上什么参数就能够成为日志文件服务器。
+答：透过 man syslogd ，查询到 -r 的选项。
+
+·如果你想要将auth这个服务的结果中只要信息等级高于warn的就发送Email到root的信箱，该如何处理？
+答：利用 vim 去编辑 /etc/syslog.conf 文件，内容为
+auth.warn root
+
+·启动系统注册表信息时，需要启动哪两个daemon呢？
+答：syslogd 记录系统软件， klogd 记录核心资讯。
+
+·syslogd以及logrotate个别通过什么机制来执行？
+答：syslogd 为 stand alone daemon 的机制； logrotate 则是透过 crontab 来运行的，只是个命令而已。

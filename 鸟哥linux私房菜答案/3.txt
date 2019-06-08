@@ -1,0 +1,252 @@
+http://blog.csdn.net/qq_37653144/article/details/77257725
+
+
+
+
+
+
+
+
+
+
+
+
+第10章 vim程序编辑器
+
+
+·我用vi打开某个文件后，要在第34行向右移动15个字符，应该在一般模式中执行什么命令？
+答：先按下34G移动光标到第34行，再执行15[→]或15j。
+
+
+·在vi打开的文件中，如何去到该文件的页首或页尾？
+答：执行1G或gg去往页首，执行G去往页尾。
+
+
+·在vi打开的文件中，如何在光标所在行中移动到行头及行尾？
+答：0或功能键[home]移动到行头，$或[end]移动到行尾。
+
+
+·vi的一般模式情况下，按下“r”有什么功能？
+答：进入替换模式（Replace mode），且只会替换光标所在的那一个字符一次。
+
+
+·在vi的环境中，如何将目前正在编辑的文件另存新文件名为newfilename？
+答：:w newfilename
+
+
+·在Linux下面最常使用的文本编辑器为vi，请问如何进入编辑模式？
+答：在一般模式下按下i,I,a,A,o,O,r,R任意一个都可以进入编辑模式。
+
+
+·在vi软件中，如何由编辑模式跳回一般模式？
+答：按下[ESC]键。
+
+
+·在vi的环境中，若上下左右键无法使用时，请问如何在一般模式移动光标？
+答：[k][j][h][l]分别代表上下左右。
+
+
+·在vi的一般模式中，如何删除一行、n行；如何删除一个字符？
+答：dd删除光标所在的那一整行，ndd删除光标所在的向下n行；x或X删除一个字符。
+
+
+·在vi的一般模式中，如何复制一行、n行并加以粘贴？
+答：yy复制光标所在的那一行，nyy复制光标所在的向下n行，然后p或P粘贴。
+
+
+·在vi的一般模式中如何查找string这个字符串？
+答：/string向后查找，?string向前查找。
+
+
+·在vi的一般模式中，如何替换word1成为word2，而若需要使用确认机制，又该如何？
+答：:1,$s/word1/word2/g替换，若需要使用确认机制，则为:1,$s/word1/word2/gc
+
+
+·在vi目前的编辑文件中，在一般模式下，如何读取一个文件filename进入当前的文件？
+答：:r filename
+
+
+·在vi目前的编辑文件中，如何存盘、离开、存盘后离开、强制存盘后离开？
+答：分别为:w,:q,:wq,:wq!
+
+
+·在vi下面做了很多的编辑操作之后，却想还原成原来的文件内容，应该怎么进行？
+答：:c!
+
+
+·我在vi这个程序当中，不想离开vi，但是想执行ls/home这个命令，vi有什么额外的功能可以达到这个目的？
+答：[Ctrl]+Z或:! ls /home
+
+
+第11章 认识与学习bash
+
+
+·在Linux上可以找到哪些shell（举出三个）？那个文件记录可用的shell是什么？而Linux默认的shell是什么？
+答：/bin/bash、/bin/ksh、/bin/csh；/etc/shells；/bin/bash。
+
+
+·在shell环境下，有个提示符（prompt），它可以修改吗？要改什么？默认的提示符内容是什么？
+答：命令提示符可以通过环境变量PS1来修改，改环境变量的内容即可，默认的提示符内容是[\u@\h\W]\$。
+
+
+·如何显示HOME这个环境变量是什么？
+答：echo $HOME
+
+
+·如何得知目前的所有变量与环境变量的设置值？
+答：set显示目前所有的变量（包括环境变量），env显示目前所有环境变量的值。
+
+
+·我是否可以设置一个变量名称为3myhome？
+答：不可以，变量名称的开头不能为数字。
+
+
+·在这样的练习中：“A=B”且“B=C”，若我执行“unset$A”，则取消的变量是A还是B？
+答：取消的变量是B。因为$A的指向为B，若想取消变量A，命令应为unset A。
+
+
+·如何取消变量与命令别名的内容？
+答：unset取消变量，unalias取消命令别名。
+
+
+·如何设置一个变量名称为name内容为It's my name？
+答：name="It\'s\ my\ name"
+
+
+·bash环境配置文件主要分为哪两种类型的读取？分别读取哪些重要文件？
+答：login：主要读取/etc/profile及~/bash_profile；non-login：主要读取~/bashrc
+
+
+·CentOS 5.x的man page的路径配置文件是什么？
+答：/etc/main.config
+
+
+·试说明'、"、与`这些符号在变量定义中的用途。
+答：变量定义用["]或[']括起来，但["]仍然可以保有变量的内容，而[']内仅能是一般字符，而不会有特殊符号；至于[`]，在一串命令中，在`之内的命令将会被先执行，而其执行出来的结果将作为外部的输入信息。
+
+
+·转义符号\有什么用途？
+答：转义特殊字符（如空格、换行、$等）。
+
+
+·连续命令中，;、&&、||有何不同？
+答：;为不考虑命令相关性的连续命令执行，&&为前一个命令正确执行才会执行下一个命令，||为前一个命令正确执行则不执行下一个命令，否则执行。
+
+
+·如何将last的结果中独立出账号，并且打印出曾经登录过的账号？
+答：last | cut -d -f1 | sort | uniq
+
+
+·请问foo1 && foo2 | foo3 > foo4，这个命令串当中，foo1/foo2/foo3/foo4是命令还是文件？整串命令的意义是什么？
+答：foo1、foo2、foo3都是命令，foo4是文件。整串命令的意义是当foo1正确执行时则执行foo2，否则不执行，然后foo2若没有正确执行则执行foo3，并将结果作为stdin输出到foo4中。
+
+
+·如何列出/bin下面任何以a为开头的文件文件名的详细数据？
+答：ls -l /bin/a*
+
+
+·如何显示/bin下面文件名为四个字符的文件？
+答：ls -l /bin/????
+
+
+·如何显示/bin下面文件名开头不是a-d的文件？
+答：ls -l /bin/[^a-d]*
+
+
+·我想要让终端机接口的登录提示符修改成我自己喜好的模样，应该要改哪里？
+答：/etc/issue
+
+
+·承上题，如果我是想要让用户登录后才显示欢迎信息，又应该要改哪里？
+答：/etc/motd
+
+
+第12章 正则表达式与文件格式化处理
+
+
+·我想要知道，在/etc下面，只要含有XYZ三个字符的任何一个字符的那一行就列出来，要怎样进行？
+答：grep [XYZ] /etc/*
+
+
+·将/etc/termcap内容取出后，去除开头为#的行、去除空白行、取出开头为英文字母的那几行以及最终统计总行数该如何进行？
+答：grep -v '^#' /etc/termcap | grep -v '^$' | grep '^[[:alpha:]]' | wc -l
+
+
+第13章 学习shell script
+
+
+·请新建一个script，当你执行该script的时候，该script可以显示你目前的身份（用whoami）和你目前所在的目录（用pwd）。
+[plain] view plain copy
+
+    #!/bin/bash  
+        echo -e "Your name is ==> $(whoami)"  
+            echo -e "The current directory is ==> $(pwd)"  
+
+
+            ·请自行写一个程序，该程序可以用来计算你还有几天可以过生日。
+            [plain] view plain copy
+
+                #!/bin/bash  
+                    read -p "Pleas input your birthday (MMDD, ex> 0709): " bir  
+                        now=`date +%m%d`  
+                            if [ "$bir" == "$now" ]; then  
+                                echo "Happy Birthday to you!!!"  
+                                    elif [ "$bir" -gt "$now" ]; then  
+                                        year=`date +%Y`  
+                                            total_d=$(($((`date --date="$year$bir" +%s`-`date +%s`))/60/60/24))  
+                                                echo "Your birthday will be $total_d later"  
+                                                    else  
+                                                        year=$((`date +%Y`+1))  
+                                                            total_d=$(($((`date --date="$year$bir" +%s`-`date +%s`))/60/60/24))  
+                                                                echo "Your birthday will be $total_d later"  
+                                                                    fi  
+
+
+                                                                    ·让用户输入一个数字，程序可以由1+2+3…一直累加到用户输入的数字为止。
+                                                                    [plain] view plain copy
+
+                                                                        #!/bin/bash  
+                                                                            read -p "Please input an integer number: " number  
+                                                                                i=0  
+                                                                                    s=0  
+                                                                                        while [ "$i" != "$number" ]  
+                                                                                            do  
+                                                                                                i=$(($i+1))  
+                                                                                                    s=$(($s+$i))  
+                                                                                                        done  
+                                                                                                            echo "the result of '1+2+3+...$number' is ==> $s"  
+
+
+                                                                                                            ·编写一支程序，它的作用是先车看一下/root/test/logical这个名称是否存在，若不存在，则创建一个文件，使用touch来创建，创建完成后离开；如果存在的话，判断该名称是否为文件，若为文件则将之删除后新建一个目录，文件名为logical，之后离开；如果存在的话，而且该名称为目录，则删除此目录！
+                                                                                                            [plain] view plain copy
+
+                                                                                                                #!/bin/bash  
+                                                                                                                    if [ ! -e logical ]; then  
+                                                                                                                        touch logical  
+                                                                                                                            echo "Just make a file logical"  
+                                                                                                                                exit 1  
+                                                                                                                                    elif [ -e logical ] && [ -f logical ]; then  
+                                                                                                                                        rm logical  
+                                                                                                                                            mkdir logical  
+                                                                                                                                                echo "remove file ==> logical"  
+                                                                                                                                                    echo "and make directory logical"  
+                                                                                                                                                        exit 1  
+                                                                                                                                                            elif [ -e logical ] && [ -d logical ]; then  
+                                                                                                                                                                rm -rf logical  
+                                                                                                                                                                    echo "remove directory ==> logical"  
+                                                                                                                                                                        exit 1  
+                                                                                                                                                                            else  
+                                                                                                                                                                                echo "Does here have anything?"  
+                                                                                                                                                                                    fi  
+
+
+                                                                                                                                                                                    ·我们知道/etc/passwd里面以:来分隔，第一列为账号名称。请写一个程序，可以将/etc/passwd的第一列取出，而且每一列都以一行字符串“The 1 account is “root””来显示，那个1表示行数。
+                                                                                                                                                                                    [plain] view plain copy
+
+                                                                                                                                                                                        #!/bin/bash  
+                                                                                                                                                                                            accounts=`cat /etc/passwd | cut -d':' -f1`  
+                                                                                                                                                                                                for account in $accounts  
+                                                                                                                                                                                                    do  
+                                                                                                                                                                                                        declare -i i=$i+1  
+                                                                                                                                                                                                            echo "The $i account is \"$account\" "  
+                                                                                                                                                                                                                done  

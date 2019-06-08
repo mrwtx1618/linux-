@@ -1,0 +1,97 @@
+第20章 启动流程、模块管理与Loader
+·如何查看与修改runlevel呢？
+答：输入“runlevel”就可以得知。而如果要修改目前的runlevel，可以直接输入 init [level] 例如要去到runlevel 3 可以：“init 3”即可。如果想要每次启动都配置固定的runlevel ，那么可以修改 /etc/inittab 这个文件。将里面这一行改成：“id:3:initdefault:”即可。
+·我有个朋友跟我说，他想要让一个程序在Linux系统下一开机就启动，但是在关机前会自动先结束该程序，我该怎么建议他？
+答：因为 /etc/rc.d/rc[0-6].d 里面有的Sxxname与Kxxname可以配置启动与关机结束的事项。所以可以写一个script放在/etc/rc.d/init.d 里面，并连结到我的run-level里。
+·万一不幸我的一些模块没有办法让Linux的内核捕获到，但是偏偏这个内核明明就有支持该模块，我要让该模块在启动的时候就被加载，那么应该写入哪个文件？
+答：应该写入 /etc/modprobe.conf (kernel 2.6.x)或者是/etc/modules.conf (kernel 2.4.x)这个文件，他是模块加载相关的地方。也可以写入/etc/sysconfig/modules/*里面。
+·如何在grub启动过程中，指定以“runlevel 1”来启动？
+答：在启动进入 boot loader 之后，利用 grub shell 的功能，亦即输入『 e 』进入编辑模式， 然后在 kernel 后面添加：
+kernel (hd0,0)/boot/vmlinuz ro root=/dev/hda1 .... single
+single也可以改成1。
+·由于一些无心之过，导致系统启动时，只要执行init就会产生错误而无法继续启动，我们知道可以在启动的时候，不要以init加载系统，可以转换第一个执行程序，假设我第一个执行程序想要改为/bin/bash，好让我自行维护系统（不同于runlevel 1），该如何进行此工作？
+答：在启动的过程当中，进入 lilo 或 grub 的画面后，在 kernel 的参数环境下，加入 init=/bin/bash 来取代 /sbin/init ，则可略过 init 与 /etc/inittab 的配置项目。
+·如果你不小心先安装Linux再安装Windows导致boot loader无法找到Linux的启动菜单，该如何挽救？
+答：1.借助第三方软件安装类似于spfdisk的软件到MBR里面。
+2.使用类似 KNOPPIX 的Live CD以光盘启动进入Linux之后，再以chroot软件切换根目录 (/)，然后重新安装grub等boot loader
+
+
+第21章 系统设置工具（网络与打印机）与硬件检测
+·如果你一定要创建一个不存在的打印机设备文件，例如/dev/usb/lp8，该如何处置？
+答：查阅该装置的主要装置代号（180），次要代号（8），再用mknod来创建，具体做法如下：
+mknod /dev/usb/lp8 c 180 8
+chown root:lp /dev/usb/lp8
+chmod 660 /dev/usb/lp8
+·如果你想要知道整个系统的周边硬件设备，可以使用哪个命令查询？
+答：lspci
+·承上题，那么如果单纯只想要知道USB设备呢？又该如何查询？
+答：lsusb
+·试说明打印操作、打印队列、打印命令、打印服务于打印机之间的相关性。
+答：打印命令可以产生打印工作，打印工作会在打印队列里面排队等待被打印。队列内的数据在打印服务有启动的环境下， 该数据可以被转成打印机可读的格式，最终打印服务会将打印工作转成适合的数据交给打印机打印出来。
+·说出三种以上目前常见的网络打印通信协议。
+答：LPD，SMB，IPP
+·如何使用lm_sensors检测主机内的温度？详细说明整个步骤。
+答：用lspci命令检测芯片组，启动进入BIOS后，查询是否有具有硬件侦测温度、电压的项目，确定Linux安装了lm_sensors后，使用sensors-detect检查所需的配置项目，然后配置/etc/modprobe.conf及/etc/rc.d/rc.local两个文件，使用 chkconfig 让 lm_sensors 启动启动，并且重新启动 (reboot)，最后开始使用 sensors 进行侦测，也可以尝试修改/etc/sensors.conf的内容。
+·（挑战题）如果你的网络设置妥当了，但是却老是发现网络不通，你觉得应该如何进行测试？
+答：(1)先检查硬件，每个环节 (网卡、hub/switch、路由器等) 的灯号是否有亮？有亮再进行下个动作；
+(2)使用 ifconfig 检查 IP 与 netmask 的数据是否正确，若正确才可进行下一步；
+(3)使用 route 看看 default gateway 是否正确，若正确再进行下一步；
+(4)使用 ping -c 3 [gateway IP] ，若有回应才进行下一步；
+(5)使用 ping -c 3 [外部IP，例如 168.95.1.1] ，若有回应则 IP 正常，若无回应，请检查 gateway 的配置
+(6)使用 dig www.google.com 看看能否找到 IP ，找不到则请检查 /etc/resolv.conf 的配置。
+第23章 软件安装：RPM、SRPM与YUM功能
+·如果你曾经修改过yum设置文件内的容器设置（/etc/yum.repos.d/*.repo），导致下次使用yum进行安装时老是发现错误，此时你该如何是好？
+答：先确认你的配置文件确实是正确的，如果没问题，可以将 yum 的缓存清除，使用『yum clean all』即可。 事实上， yum 的所有缓存、下载软件、下载软件的表头数据，都放置于/var/cache/yum/ 目录下。
+·简单说明RPM与SRPM的异同。
+答：RPM 文件是由程序打包者 (通常是由 distribution 的开发商) 藉由程序的原始码，在特定的平台上面所编译成功的 binary program 的数据，并将该数据制作成为 RPM 的格式，以方便相同软、硬件平台的使用者之安装使用。 在安装时显的很简单，因为程序打包者的平台与使用者所使用的平台默认为相同。至於SRPM则是借由与 RPM 相同的配置档数据，不过将原始码直接包在 SRPM 文件当中，而不经过编译。 因为 SRPM 所内含的数据为原始码，所以安装时必须要再经过编译的行为才能成为RPM并提供使用者安装。
+·假设我想要安装一个软件，例如pkgname.i386.rpm，但却老是发生无法安装的问题，请问我可以加入哪些参数来强制安装它？
+答：可以加入 --nodeps 等参数。例如 rpm -ivh --nodeps pkgname.i386.rpm
+承上题，你认为强制安装之后该软件是否可以正常执行？为什么？
+答：一般来说，应该是不能运行的，因为该软件具有相依属性的问题，某些时刻该软件的程序可能需要呼叫外部的函数库，但函数库可能未安装，因此当然无法运行成功。
+·有些人使用OpenLinux 3.1 Server安装在自己的P- 166 MMX，却发现无法安装，在查看了该原版光盘的内容后，发现里面的文件名称为***.i686.rpm。请问无法安装的可能原因为何？
+答：因为 P-166MMX 为 i586 的硬件平台，而 OpenLinux 为针对 i686 的硬件平台进行优化， 因此很可能由于下达的参数无法支持的问题，导致无法安装成功。
+·请问我使用 rpm -Fvh *.rpm 及 rpm -Uvh *.rpm 来升级时，两者有何不同？
+答：-Uvh 后面接的软件，如果原本未安装，则直接安装，原本已安装时，则直接升级；
+-Fvh 后面接的软件，如果原本未安装，则不安装，原本已安装时，则直接升级；
+·假设有一个厂商推出软件时，自行处理了数码签章，你想要安装他们的软件所以需要使用数码签章，假设数码签章的档名为 signe， 那你该如何安装？
+答：rpm --import signe
+·承上，假设该软件厂商提供了 yum 的安装网址为： http://their.server.name/path/ ，那你该如何处理 yum 的配置档？
+答：自己取个文件名扩展名为.repo，然后修改配置文件即可。
+第24章 X Window设置介绍
+·在X设置没问题的情况下，你在主机如何取得窗口界面？
+答：如果是在 run level 3 ，可以使用 startx 进入，如果是 run level 5 ，则直接进入 tty7 即可使用 display manager 登陆 X Window 系统。
+·利用startx可以在runlevel 3的环境下进入X Window系统。请问startx的主要功能是什么？
+答：整个 X 窗口系统的重点在启动 X server 并加载 X client ，而运行 X server/X client 呼叫的任务为 xinit ，startx 只是一个较为亲和的脚本程序，可以搜寻系统上面的 X server / X client 配置值， 以提供 xinit 来运行而已。
+·如何知道你系统当中X系统的版本与计划？
+答：以root身份执行X -version命令
+·要了解为何X系统可以允许不同硬件、主机、操作系统之间的通信，需要知道X Server /X Client的相关知识。请问X Server/X client/Window manager的主要用途功能是什么？
+答：X Server 主要负责荧幕的绘制，以及周边输入装置如鼠标、键盘等数据的收集，并反馈给 X Client ； X Client 主要负责数据的运算，收到来自 X Server 的数据后，加以运算得到图形的数据，并回传给 X Server， 让 X server 自行绘制图形。Window manager 是一个比较特殊的 X Client ，他可以管理更多控制元素， 最重要的地方还是在于窗口的大小、重叠、移动等等的功能。
+·如何重新启动X？
+答：在X Window下按下组合键[Alt]+[Ctrl]+[Backspace]。
+·试说明 ~/.xinitrc 这个文件的用途？
+答：当我们要启动 X 时，必须要启动 X Client 软件端。这个 ~/.xinitrc 即是在可视化自己的 X Client ， 你可以在这个文件内输入你自己的 X Client 。若无此文件，则默认以 /etc/X11/xinit/xinitrc 替代。
+·我在 CentOS 的系统中，默认使用 GNOME 登陆 X 。但我想要改以 KDE 登陆，该怎么办？
+答：修改/etc/sysconfig/desktopn内的配置值
+·X Server的port默认开放在哪里？
+答：port 6000
+·Linux主机是否可以有两个以上的X？
+答：可以，从tty7开始每个终端可以放一个
+·X Server的设置文件是xorg.conf，在该文件中，Section Files干嘛用的？
+答：配置显示字型用的。
+·我发现我的X系统键盘锁输入的字母老是打不出我需要的单字，可能原因是什么？该如何修改？
+答：键盘符号对应表问题，修改xorg.conf文件内关于Keyboard的Option XkbLayout项目，修改为us即可。
+·当我的系统内有安装GNOME及KDE两个XWindow Manager，我原本是以KDE为默认的WM，若想改为GNOME时，应该如何修改？
+答：修改 /etc/sysconfig/desktop。
+第25章 Linux备份策略
+·常用的完整备份（full backup）工具命令有哪些？
+答：dump + restore, dd, cpio 搭配 find 等软件。
+·你所看到的常见的存储设备有哪些？
+答：Floppy, Mo, Zip, CD-RW, DVD-RW, 外接式 U盘 硬盘, Tape, 外接式储存阵列 (RAID)，额外的储存架构，如 SAN, NAS 等。
+第26章 Linux内核编译与管理
+·简单说明内核编译的步骤。
+答：先下载内核源码，再用Tarball解码到/usr/src/kernels目录下；执行make mrproper命令删除旧数据；配置内核，可以根据需要选择“make config”、“make menuconfig”、“make xconfig”、“make oldconfig”等；清除过去的缓存文件make clean；开始核心问价与核心模块的编译make bzImage或make modules；安装核心模块make modules_install；安装核心文件make install；创建initrd文件；修改 /boot/grub/menu.lst 文件。
+·如果你利用新编译的内核来操作系统，发现系统并不稳定，你想要删除这个自行编译的内核，该如何处理？
+答：首先，将源码删除：rm -rf /usr/src/kernels/linux-2.6.30
+再者，删除掉核心模块的目录： rm -rf /lib/modules/2.6.30
+
+最后删除掉 /boot/ 内的核心文件与 initrd 文件，以及 /boot/grub/menu.lst 内的 title 配置即可。
